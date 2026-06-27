@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <circle cx="100" cy="100" r="95" fill="#0a0a0a" stroke="#CD212A" stroke-width="3"/>
+  <circle cx="100" cy="100" r="75" fill="#141414" stroke="#008C45" stroke-width="2"/>
+  <text x="100" y="88" text-anchor="middle" fill="#F4F5F0" font-family="Georgia, serif" font-size="22" font-weight="bold" letter-spacing="2">LA</text>
+  <text x="100" y="112" text-anchor="middle" fill="#CD212A" font-family="Georgia, serif" font-size="18" font-weight="bold" letter-spacing="3">MASIA</text>
+  <text x="100" y="132" text-anchor="middle" fill="#F4F5F0" font-family="Arial, sans-serif" font-size="8" letter-spacing="4" opacity="0.8">PIZZER�A</text>
+  <circle cx="60" cy="145" r="4" fill="#CD212A"/>
+  <circle cx="80" cy="150" r="3" fill="#008C45"/>
+  <circle cx="100" cy="152" r="4" fill="#CD212A"/>
+  <circle cx="120" cy="150" r="3" fill="#008C45"/>
+  <circle cx="140" cy="145" r="4" fill="#CD212A"/>
+</svg>
