@@ -23,6 +23,9 @@ const HousePizzas = () => {
     <section id="pizzas-casa">
       <div className="section-container">
         <SectionTitle subtitle="Recetas Exclusivas" title="Pizzas de la Casa" />
+        <p style={{ marginBottom: '1rem', color: 'var(--color-light-gray)' }}>
+          Promo 2x1 se aplica automáticamente a pizzas Medianas y Familiares de la casa. No aplica a pizzas individuales, combos promocionales ni pizzas personalizadas.
+        </p>
         <div className="products-grid">
           {housePizzas.map((product, index) => (
             <ProductCard

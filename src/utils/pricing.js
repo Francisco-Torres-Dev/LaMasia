@@ -11,6 +11,7 @@ const normalizeSize = (size) => {
 const is2x1Eligible = (item) => {
   if (item.category === 'promocion') return false;
   if (item.eligible2x1 === false) return false;
+  if (item.builder) return false;
   const size = normalizeSize(item.size);
   return size === 'M' || size === 'F';
 };

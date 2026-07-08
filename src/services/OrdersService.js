@@ -1,5 +1,6 @@
 import StorageService from './StorageService';
 import { generateId } from '../utils/generateId';
+import { BUSINESS_INFO } from '../data/constants';
 
 const formatComandaTime = (date = new Date()) =>
   date.toLocaleString('es-CL', {
@@ -31,7 +32,7 @@ export const OrdersService = {
     StorageService.set(StorageService.keys.COMANDAS, comandas);
   },
 
-  createOrder({ items, rawSubtotal, promo2x1Discount, couponDiscount, total, couponCode }) {
+  createOrder({ items, rawSubtotal, promo2x1Discount, couponDiscount, total, couponCode, customer = null, delivery = null, note = null, deliveryFee = 0 }) {
     const orders = this.getOrders();
     const order = {
       id: generateId(),
@@ -45,8 +46,20 @@ export const OrdersService = {
       rawSubtotal,
       promo2x1Discount,
       couponDiscount,
+      deliveryFee,
       total,
       couponCode: couponCode || null,
+      customer: customer || {
+        name: 'Cliente Web',
+        phone: null,
+        email: null,
+      },
+      delivery: delivery || {
+        type: 'pickup',
+        address: BUSINESS_INFO.address,
+        distanceLabel: 'Retiro',
+      },
+      note: note || null,
       status: 'pendiente',
       comandaId: null,
       createdAt: new Date().toISOString(),
@@ -68,6 +81,39 @@ export const OrdersService = {
     return orders.find((o) => o.id === orderId);
   },
 
+  updateOrder(orderId, updates = {}) {
+    const orders = this.getOrders();
+    let updatedOrder = null;
+
+    const newOrders = orders.map((order) => {
+      if (order.id !== orderId) return order;
+
+      // Merge nested delivery safely
+      const mergedDelivery = { ...(order.delivery || {}), ...(updates.delivery || {}) };
+
+      const merged = {
+        ...order,
+        ...updates,
+        delivery: mergedDelivery,
+        updatedAt: new Date().toISOString(),
+      };
+
+      // Recompute total from components if available
+      const rawSubtotal = merged.rawSubtotal ?? 0;
+      const promo2x1Discount = merged.promo2x1Discount ?? 0;
+      const couponDiscount = merged.couponDiscount ?? 0;
+      const deliveryFee = merged.deliveryFee ?? 0;
+
+      merged.total = rawSubtotal - promo2x1Discount - couponDiscount + deliveryFee;
+
+      updatedOrder = merged;
+      return merged;
+    });
+
+    if (updatedOrder) this.saveOrders(newOrders);
+    return updatedOrder;
+  },
+
   acceptOrder(orderId) {
     const orders = this.getOrders();
     const order = orders.find((o) => o.id === orderId);
@@ -82,6 +128,10 @@ export const OrdersService = {
       items: order.items,
       total: order.total,
       promo2x1Discount: order.promo2x1Discount,
+      deliveryFee: order.deliveryFee,
+      note: order.note,
+      delivery: order.delivery,
+      customer: order.customer,
       createdAt: now.toISOString(),
       time: formatComandaTime(now),
     };
@@ -143,6 +193,24 @@ export const OrdersService = {
       }
       if (order.couponDiscount > 0) {
         lines.push(`  Cupón${order.couponCode ? ` (${order.couponCode})` : ''}: -$${order.couponDiscount.toLocaleString('es-CL')}`);
+      }
+      if (order.customer) {
+        lines.push(`Cliente: ${order.customer.name}${order.customer.phone ? ` / ${order.customer.phone}` : ''}`);
+      }
+      if (order.delivery) {
+        lines.push(`Tipo de pedido: ${order.delivery.type === 'delivery' ? 'Envío' : 'Retiro'}`);
+        if (order.delivery.address) {
+          lines.push(`Dirección: ${order.delivery.address}`);
+        }
+        if (order.delivery.distanceLabel) {
+          lines.push(`Distancia: ${order.delivery.distanceLabel}`);
+        }
+      }
+      if (order.note) {
+        lines.push(`Nota: ${order.note}`);
+      }
+      if (order.deliveryFee > 0) {
+        lines.push(`Costo envío: $${order.deliveryFee.toLocaleString('es-CL')}`);
       }
       lines.push(`  TOTAL: $${order.total.toLocaleString('es-CL')}`);
       lines.push('-'.repeat(50));

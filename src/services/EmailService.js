@@ -15,10 +15,10 @@ export const EmailService = {
    * @param {Object|null} orderData.customer - Datos del cliente (opcional)
    * @returns {Object} Payload listo para API
    */
-  buildOrderPayload({ items, subtotal, discount, total, couponCode, customer = null }) {
+  buildOrderPayload({ items, subtotal, discount, total, couponCode, customer = null, delivery = null, note = null, deliveryFee = 0 }) {
     return {
       businessName: BUSINESS_INFO.name,
-      businessEmail: 'contacto@lamasiapizzeria.cl',
+      businessEmail: BUSINESS_INFO.email,
       orderDate: new Date().toISOString(),
       customer: customer || {
         name: 'Cliente Web',
@@ -41,10 +41,12 @@ export const EmailService = {
         couponCode: couponCode || null,
         currency: 'CLP',
       },
-      delivery: {
+      delivery: delivery || {
         type: 'pickup',
         address: BUSINESS_INFO.address,
       },
+      note,
+      deliveryFee,
       metadata: {
         source: 'web-frontend',
         version: '1.0.0',

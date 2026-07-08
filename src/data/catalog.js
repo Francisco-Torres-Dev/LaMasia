@@ -192,12 +192,12 @@ export const buildPizzaConfig = {
   ingredientTiers: {
     vegetales: {
       label: 'Vegetales',
-      items: ['Champiñón', 'Tomate', 'Piña', 'Aceitunas', 'Choclo', 'Pimentón', 'Tomate cherry', 'Espárrago', 'Rúcula', 'Albahaca', 'Cebolla caramelizada', 'Cebolla morada', 'Palmito'],
+      items: ['Champiñón', 'Tomate', 'Piña', 'Aceitunas', 'Choclo', 'Pimentón', 'Tomate cherry', 'Espárrago', 'Albahaca', 'Cebolla caramelizada', 'Cebolla morada', 'Palmito'],
       prices: { I: 900, M: 1300, F: 1700 },
     },
     estandar: {
       label: 'Estándar',
-      items: ['Carne vacuno', 'Pollo', 'Jamón', 'Choricillo', 'Salame', 'Pepperoni', 'Fondo de alcachofa'],
+      items: ['Carne vacuno', 'Pollo', 'Jamón', 'Choricillo', 'Chorizo', 'Salame', 'Pepperoni', 'Fondo de alcachofa'],
       prices: { I: 1300, M: 1800, F: 2300 },
     },
     premium: {

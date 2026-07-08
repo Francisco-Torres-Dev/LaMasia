@@ -61,6 +61,8 @@ const BuildYourPizza = () => {
         size: selectedSize,
         price: totalPrice,
         details,
+        eligible2x1: false,
+        builder: true,
       }
     );
 

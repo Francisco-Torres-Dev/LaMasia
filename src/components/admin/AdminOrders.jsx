@@ -31,11 +31,33 @@ const AdminOrders = () => {
     comandas,
     updateOrderStatus,
     acceptOrder,
+    updateOrder,
     exportOrdersTxt,
     refreshOrders,
+    deliverySettings,
+    setDeliverySettings,
   } = useCart();
 
   const [filterDate, setFilterDate] = useState(new Date().toISOString().slice(0, 10));
+  const [localDeliverySettings, setLocalDeliverySettings] = useState(deliverySettings);
+
+  const handleDeliveryTierChange = (tierIndex, field, value) => {
+    setLocalDeliverySettings((prev) => {
+      const updatedTiers = prev.tiers.map((tier, index) =>
+        index === tierIndex ? { ...tier, [field]: field === 'value' ? Number(value) : value } : tier
+      );
+      return { ...prev, tiers: updatedTiers };
+    });
+  };
+
+  const handleOutsideRangeFeeChange = (value) => {
+    setLocalDeliverySettings((prev) => ({ ...prev, outsideRangeFee: Number(value) }));
+  };
+
+  const saveDeliverySettings = () => {
+    setDeliverySettings(localDeliverySettings);
+    Swal.fire({ icon: 'success', title: 'Tarifas de envío actualizadas', timer: 2000, showConfirmButton: false });
+  };
 
   const filteredOrders = filterDate
     ? orders.filter((o) => o.createdAt.slice(0, 10) === filterDate)
@@ -86,6 +108,42 @@ const AdminOrders = () => {
         </p>
       </div>
 
+      <div className="admin-form-card">
+        <h3>Configuración de Envío</h3>
+        <div className="admin-form-grid">
+          {localDeliverySettings?.tiers?.map((tier, index) => (
+            <div key={tier.id} className="form-group">
+              <label>{tier.label}</label>
+              <input
+                type="text"
+                className="form-control-masia"
+                value={tier.label}
+                onChange={(e) => handleDeliveryTierChange(index, 'label', e.target.value)}
+              />
+              <input
+                type="number"
+                className="form-control-masia"
+                value={tier.value}
+                onChange={(e) => handleDeliveryTierChange(index, 'value', e.target.value)}
+                style={{ marginTop: '0.5rem' }}
+              />
+            </div>
+          ))}
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label>Tarifa fuera de rango</label>
+            <input
+              type="number"
+              className="form-control-masia"
+              value={localDeliverySettings?.outsideRangeFee || 0}
+              onChange={(e) => handleOutsideRangeFeeChange(e.target.value)}
+            />
+          </div>
+        </div>
+        <button type="button" className="btn-primary-masia btn-sm" onClick={saveDeliverySettings}>
+          Guardar configuración de envío
+        </button>
+      </div>
+
       <div className="admin-table-wrapper" style={{ marginBottom: '2rem' }}>
         <table className="admin-table">
           <thead>
@@ -121,12 +179,89 @@ const AdminOrders = () => {
                       ))}
                     </ul>
                     {order.promo2x1Discount > 0 && (
-                      <small style={{ color: 'var(--color-italian-green)' }}>
+                      <small style={{ color: 'var(--color-italian-green)', display: 'block' }}>
                         2x1: -{formatCurrency(order.promo2x1Discount)}
                       </small>
                     )}
+                    {order.customer?.name && (
+                      <small style={{ display: 'block', marginTop: '0.35rem' }}>
+                        Cliente: {order.customer.name}{order.customer?.phone ? ` / ${order.customer.phone}` : ''}
+                      </small>
+                    )}
+                    {order.delivery && (
+                      <>
+                        <small style={{ display: 'block', marginTop: '0.25rem' }}>
+                          {order.delivery.type === 'delivery' ? 'Envío' : 'Retiro'} - {order.delivery.address || ''}
+                        </small>
+                        {order.delivery.distanceLabel && (
+                          <small style={{ display: 'block', marginTop: '0.15rem', color: 'var(--color-light-gray)' }}>
+                            Rango: {order.delivery.distanceLabel}
+                          </small>
+                        )}
+
+                        {order.delivery.type === 'delivery' && (
+                          <div style={{ marginTop: '0.5rem' }}>
+                            <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '0.25rem' }}>Asignar rango / tarifa</label>
+                            <select
+                              className="form-control-masia"
+                              value={order.delivery?.tierId || deliverySettings?.tiers?.find((t) => t.label === order.delivery?.distanceLabel)?.id || ''}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                if (!val) return;
+                                if (val === '__outside__') {
+                                  const fee = deliverySettings?.outsideRangeFee || 0;
+                                  const updated = updateOrder(order.id, {
+                                    delivery: { ...order.delivery, tierId: val, distanceLabel: 'Fuera de rango' },
+                                    deliveryFee: fee,
+                                  });
+                                  Swal.fire({ icon: 'success', title: 'Rango asignado', timer: 1500, showConfirmButton: false });
+                                  return;
+                                }
+                                const tier = deliverySettings?.tiers?.find((t) => t.id === val);
+                                if (!tier) return;
+                                updateOrder(order.id, {
+                                  delivery: { ...order.delivery, tierId: tier.id, distanceLabel: tier.label },
+                                  deliveryFee: tier.value,
+                                });
+                                Swal.fire({ icon: 'success', title: 'Rango asignado', timer: 1500, showConfirmButton: false });
+                              }}
+                            >
+                              <option value="">— Seleccionar —</option>
+                              {deliverySettings?.tiers?.map((tier) => (
+                                <option key={tier.id} value={tier.id}>{tier.label} — {formatCurrency(tier.value)}</option>
+                              ))}
+                              <option value="__outside__">Fuera de rango — {formatCurrency(deliverySettings?.outsideRangeFee || 0)}</option>
+                            </select>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {order.note && (
+                      <small style={{ display: 'block', marginTop: '0.25rem' }}>
+                        Nota: {order.note}
+                      </small>
+                    )}
+                    {order.deliveryFee > 0 && (
+                      <small style={{ display: 'block', marginTop: '0.25rem' }}>
+                        Envío: {formatCurrency(order.deliveryFee)}
+                      </small>
+                    )}
                   </td>
-                  <td><strong>{formatCurrency(order.total)}</strong></td>
+                  <td>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                      <span style={{ fontSize: '0.85rem' }}>Subtotal: {formatCurrency(order.rawSubtotal ?? 0)}</span>
+                      {order.promo2x1Discount > 0 && (
+                        <span style={{ color: 'var(--color-italian-green)', fontSize: '0.85rem' }}>2x1: -{formatCurrency(order.promo2x1Discount)}</span>
+                      )}
+                      {order.couponDiscount > 0 && (
+                        <span style={{ color: 'var(--color-italian-green)', fontSize: '0.85rem' }}>Cupón: -{formatCurrency(order.couponDiscount)}</span>
+                      )}
+                      {order.deliveryFee > 0 && (
+                        <span style={{ fontSize: '0.85rem' }}>Envío: {formatCurrency(order.deliveryFee)}</span>
+                      )}
+                      <strong style={{ marginTop: '0.25rem' }}>{formatCurrency(order.total)}</strong>
+                    </div>
+                  </td>
                   <td>
                     <select
                       className="form-control-masia admin-status-select"

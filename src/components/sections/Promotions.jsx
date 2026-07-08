@@ -2,7 +2,15 @@ import Swal from 'sweetalert2';
 import SectionTitle from '../ui/SectionTitle';
 import PromoCard from '../ui/PromoCard';
 import { useCart } from '../../context/CartContext';
+import { buildPizzaConfig } from '../../data/catalog';
 import '../ui/components.css';
+
+const availablePromoIngredients = Array.from(
+  new Set([
+    ...buildPizzaConfig.baseIngredients,
+    ...Object.values(buildPizzaConfig.ingredientTiers).flatMap((tier) => tier.items),
+  ])
+);
 
 /**
  * Promoción 2x1 automática + combos con precio fijo.
@@ -11,7 +19,61 @@ const Promotions = () => {
   const { promotions, addToCart } = useCart();
   const activePromos = promotions.filter((p) => p.active);
 
-  const handleAdd = (product) => {
+  const handleAdd = async (product) => {
+    if (product.category === 'promocion') {
+      const result = await Swal.fire({
+        title: 'Elige tus ingredientes',
+        html: `
+          <p style="margin-bottom: 1rem; color: var(--color-light-gray);">Selecciona exactamente 3 ingredientes para tu promo.</p>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.6rem; text-align: left;">
+            ${availablePromoIngredients
+              .map(
+                (ingredient) => `
+                  <label style="display: flex; align-items: center; gap: 0.45rem; font-size: 0.95rem;">
+                    <input type="checkbox" value="${ingredient}" />
+                    ${ingredient}
+                  </label>
+                `
+              )
+              .join('')}
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Agregar promo',
+        cancelButtonText: 'Cancelar',
+        focusConfirm: false,
+        preConfirm: () => {
+          const selectedIngredients = Array.from(
+            document.querySelectorAll('.swal2-popup input[type="checkbox"]:checked')
+          ).map((checkbox) => checkbox.value);
+
+          if (selectedIngredients.length !== 3) {
+            Swal.showValidationMessage('Debes elegir exactamente 3 ingredientes.');
+            return false;
+          }
+
+          return selectedIngredients;
+        },
+      });
+
+      if (!result.isConfirmed || !Array.isArray(result.value)) {
+        return;
+      }
+
+      addToCart(product, 1, {
+        details: `Ingredientes: ${result.value.join(', ')}`,
+      });
+
+      Swal.fire({
+        icon: 'success',
+        title: '¡Promoción agregada!',
+        text: `${product.name} añadida al carrito con tus 3 ingredientes`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      return;
+    }
+
     addToCart(product);
     Swal.fire({
       icon: 'success',
@@ -33,7 +95,7 @@ const Promotions = () => {
             Al agregar <strong>2 pizzas Medianas</strong> o <strong>2 pizzas Familiares</strong>{' '}
             (iguales o distintas), el carrito aplica automáticamente el 2x1: pagas solo la más cara.
           </p>
-          <p className="promo-2x1-note">No aplica a Individual ni a combos promocionales.</p>
+          <p className="promo-2x1-note">No aplica a Individual, a combos promocionales ni a pizzas personalizadas.</p>
         </div>
 
         <h3 style={{ marginBottom: '1.5rem', fontSize: '1.3rem' }}>Combos Promocionales</h3>

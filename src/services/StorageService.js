@@ -10,6 +10,7 @@ const STORAGE_KEYS = {
   ADMIN_SESSION: 'lamasia_admin_session',
   ORDERS: 'lamasia_orders',
   COMANDAS: 'lamasia_comandas',
+  DELIVERY_SETTINGS: 'lamasia_delivery_settings',
   CATALOG_VERSION: 'lamasia_catalog_version',
 };
 

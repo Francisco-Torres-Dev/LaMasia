@@ -44,7 +44,7 @@ const PromoCard = ({ promo, onAddToCart, index = 0 }) => {
         <div className="promo-card-footer">
           <span className="promo-price">{formatCurrency(promo.price)}</span>
           <button type="button" className="btn-primary-masia btn-sm" onClick={handleAdd}>
-            <FaShoppingCart /> Agregar
+            <FaShoppingCart /> {promo.category === 'promocion' ? 'Elegir ingredientes' : 'Agregar'}
           </button>
         </div>
       </div>

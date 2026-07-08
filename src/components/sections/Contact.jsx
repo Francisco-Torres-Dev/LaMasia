@@ -68,6 +68,13 @@ const Contact = () => {
               </div>
             </div>
             <div className="contact-info-item">
+              <div className="contact-info-icon"><FaMapMarkerAlt /></div>
+              <div>
+                <strong>Email</strong>
+                <p>{BUSINESS_INFO.email}</p>
+              </div>
+            </div>
+            <div className="contact-info-item">
               <div className="contact-info-icon"><FaInstagram /></div>
               <div>
                 <strong>Instagram</strong>

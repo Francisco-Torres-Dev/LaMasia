@@ -6,9 +6,10 @@ export const BUSINESS_INFO = {
   shortAddress: 'Tocornal 1741, Puente Alto',
   whatsapp: '+56990762511',
   whatsappDisplay: '+56 9 9076 2511',
+  email: 'lamasiapizzeria@gmail.com',
   instagram: '@lamasiapizzeria',
   instagramUrl: 'https://instagram.com/lamasiapizzeria',
-  schedule: 'Lunes a Domingo · 12:00 - 23:00',
+  schedule: 'Domingo a Jueves · 12:30 - 22:00 · Viernes y Sábado · 12:30 - 23:00',
   foundedYear: 2026,
   mapsEmbedUrl:
     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3329.5!2d-70.58!3d-33.61!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzPCsDM2JzM2LjAiUyA3MMKwMzQnNDguMCJX!5e0!3m2!1ses!2scl!4v1700000000000!5m2!1ses!2scl',

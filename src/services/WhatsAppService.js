@@ -2,7 +2,13 @@ import { BUSINESS_INFO } from '../data/constants';
 import { formatNumber } from '../utils/formatCurrency';
 
 export const generateWhatsAppMessage = (items, total, options = {}) => {
-  const { promo2x1Discount = 0 } = options;
+  const {
+    promo2x1Discount = 0,
+    customer = null,
+    delivery = null,
+    note = null,
+    deliveryFee = 0,
+  } = options;
 
   const lines = items.map(
     (item) => {
@@ -23,6 +29,33 @@ export const generateWhatsAppMessage = (items, total, options = {}) => {
 
   if (promo2x1Discount > 0) {
     messageLines.push(`Promo 2x1 aplicada: -$${formatNumber(promo2x1Discount)}`);
+    messageLines.push('');
+  }
+
+  if (customer) {
+    messageLines.push(`Cliente: ${customer.name}`);
+    if (customer.phone) {
+      messageLines.push(`Teléfono: ${customer.phone}`);
+    }
+    messageLines.push('');
+  }
+
+  if (delivery) {
+    messageLines.push(`Tipo de pedido: ${delivery.type === 'delivery' ? 'Envío' : 'Retiro'}`);
+    if (delivery.address) {
+      messageLines.push(`Dirección: ${delivery.address}`);
+    }
+    if (delivery.distanceLabel) {
+      messageLines.push(`Distancia: ${delivery.distanceLabel}`);
+    }
+    if (deliveryFee > 0) {
+      messageLines.push(`Costo envío: $${formatNumber(deliveryFee)}`);
+    }
+    messageLines.push('');
+  }
+
+  if (note) {
+    messageLines.push(`Nota: ${note}`);
     messageLines.push('');
   }
 

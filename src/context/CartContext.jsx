@@ -21,6 +21,14 @@ export const CartProvider = ({ children }) => {
   const [drinks, setDrinksState] = useLocalStorage(StorageService.keys.DRINKS, initialDrinks);
   const [promotions, setPromotionsState] = useLocalStorage(StorageService.keys.PROMOTIONS, initialPromotions);
   const [coupons, setCouponsState] = useLocalStorage(StorageService.keys.COUPONS, initialCoupons);
+  const [deliverySettings, setDeliverySettings] = useLocalStorage(StorageService.keys.DELIVERY_SETTINGS, {
+    tiers: [
+      { id: '0-3', label: 'Hasta 3 km', value: 2000 },
+      { id: '3.1-4.1', label: '3.1 a 4.1 km', value: 3000 },
+      { id: '4.1-5.1', label: '4.1 a 5.1 km', value: 4000 },
+    ],
+    outsideRangeFee: 0,
+  });
   const [orders, setOrdersState] = useState(() => OrdersService.getOrders());
   const [comandas, setComandasState] = useState(() => OrdersService.getComandas());
 
@@ -40,7 +48,10 @@ export const CartProvider = ({ children }) => {
       if (price == null) return;
 
       const sizeLabel = size ? SIZE_LABELS[size] || size : null;
-      const eligible2x1 = product.category === 'pizza' && (size === 'M' || size === 'F');
+      const eligible2x1 =
+        product.category === 'pizza' &&
+        (size === 'M' || size === 'F') &&
+        options.eligible2x1 !== false;
 
       setItems((prev) => {
         const cartKey = `${product.id}-${size || 'default'}-${details || ''}`;
@@ -131,19 +142,23 @@ export const CartProvider = ({ children }) => {
   );
 
   const createOrder = useCallback(
-    (totals) => {
+    (orderData) => {
       const order = OrdersService.createOrder({
         items,
-        rawSubtotal: totals.rawSubtotal,
-        promo2x1Discount: totals.promo2x1Discount,
-        couponDiscount: totals.couponDiscount,
-        total: totals.total,
+        rawSubtotal: cartTotals.rawSubtotal,
+        promo2x1Discount: cartTotals.promo2x1Discount,
+        couponDiscount: cartTotals.couponDiscount,
+        total: cartTotals.total + (orderData.deliveryFee || 0),
         couponCode: appliedCoupon?.code,
+        customer: orderData.customer,
+        delivery: orderData.delivery,
+        note: orderData.note,
+        deliveryFee: orderData.deliveryFee || 0,
       });
       refreshOrders();
       return order;
     },
-    [items, appliedCoupon, refreshOrders]
+    [items, appliedCoupon, refreshOrders, cartTotals]
   );
 
   const updateOrderStatus = useCallback(
@@ -159,6 +174,15 @@ export const CartProvider = ({ children }) => {
       const result = OrdersService.acceptOrder(orderId);
       refreshOrders();
       return result;
+    },
+    [refreshOrders]
+  );
+
+  const updateOrder = useCallback(
+    (orderId, updates) => {
+      const updated = OrdersService.updateOrder(orderId, updates);
+      refreshOrders();
+      return updated;
     },
     [refreshOrders]
   );
@@ -195,6 +219,9 @@ export const CartProvider = ({ children }) => {
       getOrdersByDate,
       exportOrdersTxt,
       refreshOrders,
+      deliverySettings,
+      setDeliverySettings,
+      updateOrder,
       setProducts: setProductsState,
       setDrinks: setDrinksState,
       setPromotions: setPromotionsState,
