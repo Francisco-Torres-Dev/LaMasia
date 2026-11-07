@@ -1,37 +1,51 @@
 /**
  * Versión del catálogo — incrementar para forzar recarga desde localStorage.
  */
-import margaritaImage from '../assets/Pizzas/Margarita.png';
-import pepperoniImage from '../assets/Pizzas/Pepperoni.png';
-import napolitanaImage from '../assets/Pizzas/Napolitana.png';
-import capreseImage from '../assets/Pizzas/Caprese.png';
-import vegetarianaImage from '../assets/Pizzas/Vegetariana  Vegana.png';
-import ilBambinoImage from '../assets/Pizzas/Il Bambino.png';
-import polloBbqImage from '../assets/Pizzas/Pollo BBQ.png';
-import camaronBaconImage from '../assets/Pizzas/Camarón Bacon.png';
-import ibericaImage from '../assets/Pizzas/Ibérica.png';
-import cuatroCarnesImage from '../assets/Pizzas/4 Carnes.png';
-import hawaianaImage from '../assets/Pizzas/Hawaiana.png';
-import supremaImage from '../assets/Pizzas/Suprema.png';
-import chilenaImage from '../assets/Pizzas/Chilena.png';
-import espanolaImage from '../assets/Pizzas/Española.png';
-import especialMixImage from '../assets/Pizzas/Special Mix.png';
-import mechadaImage from '../assets/Pizzas/Mechada.png';
-import fullPepperoniImage from '../assets/Pizzas/Full Peperoni.png';
-import cuatroQuesosImage from '../assets/Pizzas/4Quesos.png';
-import laMasiaImage from '../assets/Pizzas/LaMasia.png';
-
 import promo1Image from '../assets/Promos/Promo1.png';
 import promo2Image from '../assets/Promos/Promo2.png';
 import promo3Image from '../assets/Promos/Promo3.png';
 import promo4Image from '../assets/Promos/Promo4.png';
 
-import palitosAjoImage from '../assets/Acompañantes/PalitosDeAjo.png';
-import alitasBbqImage from '../assets/Acompañantes/Alitasbbq.png';
-import stromboliImage from '../assets/Acompañantes/Stromboli.png';
-import lasanaImage from '../assets/Acompañantes/Lasaña.png';
+/**
+ * Helper para apuntar a las fotos reales ubicadas en /public/pizzas/Fotos reales/
+ */
+const realPhoto = (fileName) => `/pizzas/Fotos%20reales/${encodeURIComponent(fileName)}`;
 
-export const CATALOG_VERSION = 3;
+const margaritaImage = realPhoto('margarita.jpg');
+const pepperoniImage = realPhoto('peperonni.jpg');
+const napolitanaImage = realPhoto('napolitana.jpg');
+const capreseImage = realPhoto('caprese.jpg');
+const vegetarianaImage = realPhoto('vegetariana.jpg');
+const ilBambinoImage = realPhoto('il bambino.jpg');
+const polloBbqImage = realPhoto('pollo bbq.jpg');
+const camaronBaconImage = realPhoto('camaron.jpg');
+const ibericaImage = realPhoto('iberica.jpg');
+const cuatroCarnesImage = realPhoto('cuatro carnes.jpg');
+const hawaianaImage = realPhoto('hawuallana.jpg');
+const supremaImage = realPhoto('suprema.jpg');
+const chilenaImage = realPhoto('chilena.jpg');
+const espanolaImage = realPhoto('española.jpg');
+const especialMixImage = realPhoto('especial mix.jpg');
+const mechadaImage = realPhoto('mechada.jpg');
+const fullPepperoniImage = realPhoto('peperonni full.jpg');
+const cuatroQuesosImage = realPhoto('cuatro quesos.jpg');
+const laMasiaImage = realPhoto('la masia.jpg');
+
+const palitosAjoImage = realPhoto('palos de ajo.jpg');
+const alitasBbqImage = realPhoto('alitas bbq.jpg');
+const stromboliImage = realPhoto('stronboli.jpg');
+const lasanaImage = realPhoto('lasana.jpg');
+const ensaladaGriegaImage = realPhoto('ensalada griega.jpg');
+const ensaladaCesarImage = realPhoto('ensalada cesar.jpg');
+const calzonNapolitanoImage = realPhoto('calzon napolitano.jpg');
+const papasCheddarImage = realPhoto('papas cheddar.jpg');
+const papasCheddarTocinoImage = realPhoto('papas cheddar tocino.jpg');
+const papasSupremasImage = realPhoto('papas supremas.jpg');
+const panPitaImage = realPhoto('pan pita.jpg');
+const salsasImage = realPhoto('salsas.jpg');
+const portadaRealImage = realPhoto('portada dos.jpg');
+
+export const CATALOG_VERSION = 6;
 
 export const SIZE_LABELS = {
   I: 'Individual',
@@ -41,11 +55,11 @@ export const SIZE_LABELS = {
 
 export const IMAGES = {
   logo: '/logo.jpg',
-  hero: '/pizza-hero.jpeg',
-  menu: '/pizza-menu.jpeg',
-  pizza: '/pizza-menu.jpeg',
-  promo: '/pizza-hero.jpeg',
-  acompanamiento: '/pizza-menu.jpeg',
+  hero: portadaRealImage,
+  menu: portadaRealImage,
+  pizza: laMasiaImage,
+  promo: portadaRealImage,
+  acompanamiento: palitosAjoImage,
   bebida: '/pizza-hero.jpeg',
 };
 
@@ -55,7 +69,7 @@ export const PIZZA_IMAGES = {
   promo: IMAGES.promo,
   drink: IMAGES.bebida,
   papitas: IMAGES.acompanamiento,
-  stromboli: IMAGES.acompanamiento,
+  stromboli: stromboliImage,
 };
 
 const img = (key = 'pizza') => IMAGES[key] || IMAGES.pizza;
@@ -142,26 +156,26 @@ export const initialPromotions = [
 ];
 
 export const initialAccompaniments = [
-  { id: 'palitos-ajo', name: 'Palitos de ajo (6)', category: 'acompanamiento', price: 3900, image: palitosAjoImage, active: true },
-  { id: 'alitas-bbq', name: 'Alitas BBQ (6)', category: 'acompanamiento', price: 5900, image: alitasBbqImage, active: true },
-  { id: 'stromboli', name: 'Stromboli (6)', category: 'acompanamiento', price: 6900, image: stromboliImage, active: true },
-  { id: 'lasana', name: 'Lasaña', category: 'acompanamiento', price: 5900, image: lasanaImage, active: true },
-  { id: 'ensalada-griega', name: 'Ensalada griega', category: 'acompanamiento', price: 5500, image: img('acompanamiento'), active: true },
-  { id: 'ensalada-cesar', name: 'Ensalada César', category: 'acompanamiento', price: 5500, image: img('acompanamiento'), active: true },
-  { id: 'calzon-napolitano', name: 'Calzón napolitano', category: 'acompanamiento', price: 2900, image: img('acompanamiento'), active: true },
+  { id: 'palitos-ajo', name: 'Palitos de ajo (6)', category: 'acompanamiento', description: 'Masa napolitana con mantequilla al ajo, parmesano y orégano + salsa a elección', price: 3900, image: palitosAjoImage, active: true },
+  { id: 'alitas-bbq', name: 'Alitas BBQ (6)', category: 'acompanamiento', description: '6 alitas de pollo horneadas bañadas en salsa BBQ artesanal', price: 5900, image: alitasBbqImage, active: true },
+  { id: 'stromboli', name: 'Stromboli (6)', category: 'acompanamiento', description: 'Rollitos rellenos de mozzarella, jamón o pepperoni + salsa a elección', price: 6900, image: stromboliImage, active: true },
+  { id: 'lasana', name: 'Lasaña', category: 'acompanamiento', description: 'Lasaña artesanal horneada con salsa boloñesa, bechamel y queso gratinado', price: 5900, image: lasanaImage, active: true },
+  { id: 'ensalada-griega', name: 'Ensalada griega', category: 'acompanamiento', description: 'Mix de hojas verdes, tomate cherry, aceitunas, pepino, cebolla morada y queso cabra', price: 5500, image: ensaladaGriegaImage, active: true },
+  { id: 'ensalada-cesar', name: 'Ensalada César', category: 'acompanamiento', description: 'Lechuga fresca, pollo grillado, crutones caseros, parmesano y aderezo César', price: 5500, image: ensaladaCesarImage, active: true },
+  { id: 'calzon-napolitano', name: 'Calzón napolitano', category: 'acompanamiento', description: 'Masa tradicional doblada rellena de salsa pomodoro, mozzarella, jamón y tomate', price: 2900, image: calzonNapolitanoImage, active: true },
 ];
 
 export const initialPapas = [
-  { id: 'papas-cheddar-m', name: 'Papas Cheddar Mediana', category: 'papas', price: 3200, image: img('acompanamiento'), active: true },
-  { id: 'papas-cheddar-f', name: 'Papas Cheddar Familiar', category: 'papas', price: 5200, image: img('acompanamiento'), active: true },
-  { id: 'papas-cheddar-tocino-m', name: 'Papas Cheddar + Tocino Mediana', category: 'papas', price: 3900, image: img('acompanamiento'), active: true, tag: 'mas-vendida' },
-  { id: 'papas-cheddar-tocino-f', name: 'Papas Cheddar + Tocino Familiar', category: 'papas', price: 5900, image: img('acompanamiento'), active: true },
-  { id: 'papas-supremas', name: 'Papas Supremas', category: 'papas', price: 6900, image: img('acompanamiento'), active: true },
+  { id: 'papas-cheddar-m', name: 'Papas Cheddar Mediana', category: 'papas', description: 'Papas fritas crujientes bañadas en abundante salsa de queso cheddar', price: 3200, image: papasCheddarImage, active: true },
+  { id: 'papas-cheddar-f', name: 'Papas Cheddar Familiar', category: 'papas', description: 'Porción familiar de papas fritas con abundante salsa de queso cheddar', price: 5200, image: papasCheddarImage, active: true },
+  { id: 'papas-cheddar-tocino-m', name: 'Papas Cheddar + Tocino Mediana', category: 'papas', description: 'Papas fritas con salsa de queso cheddar fundido y trozos de tocino crocante', price: 3900, image: papasCheddarTocinoImage, active: true, tag: 'mas-vendida' },
+  { id: 'papas-cheddar-tocino-f', name: 'Papas Cheddar + Tocino Familiar', category: 'papas', description: 'Porción familiar de papas fritas con salsa cheddar y tocino crocante', price: 5900, image: papasCheddarTocinoImage, active: true },
+  { id: 'papas-supremas', name: 'Papas Supremas', category: 'papas', description: 'Papas fritas cargadas con queso cheddar, carne/chili, tocino y salsas de la casa', price: 6900, image: papasSupremasImage, active: true },
 ];
 
 export const initialSalsas = [
-  { id: 'pan-pita', name: 'Pan pita', category: 'salsa', price: 500, image: img('acompanamiento'), active: true },
-  { id: 'salsa-adicional', name: 'Salsa adicional', category: 'salsa', description: 'Pomodoro, Cheddar, Sour cream, Mayo cilantro, Pesto, BBQ', price: 500, image: img('acompanamiento'), active: true },
+  { id: 'pan-pita', name: 'Pan pita', category: 'salsa', description: 'Pan pita artesanal recién horneado a la piedra', price: 500, image: panPitaImage, active: true },
+  { id: 'salsa-adicional', name: 'Salsa adicional', category: 'salsa', description: 'Pomodoro, Cheddar, Sour cream, Mayo cilantro, Pesto, BBQ', price: 500, image: salsasImage, active: true },
 ];
 
 export const initialDrinks = [

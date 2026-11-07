@@ -1,4 +1,5 @@
 import Hero from '../components/sections/Hero';
+import DailyPromoBanner from '../components/sections/DailyPromoBanner';
 import About from '../components/sections/About';
 import Products from '../components/sections/Products';
 import Promotions from '../components/sections/Promotions';
@@ -14,6 +15,7 @@ import Contact from '../components/sections/Contact';
 const HomePage = () => (
   <>
     <Hero />
+    <DailyPromoBanner />
     <About />
     <Products />
     <Promotions />

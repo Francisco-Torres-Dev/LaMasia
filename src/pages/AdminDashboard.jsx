@@ -2,17 +2,28 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
+import {
+  FaChartLine,
+  FaBoxes,
+  FaPizzaSlice,
+  FaTags,
+  FaTicketAlt,
+  FaClipboardList,
+} from 'react-icons/fa';
 import { useAdmin } from '../context/AdminContext';
 import { useCart } from '../context/CartContext';
 import { ADMIN_ROUTE } from '../data/constants';
 import { generateId } from '../utils/generateId';
 import { formatCurrency } from '../utils/formatCurrency';
 import AdminOrders from '../components/admin/AdminOrders';
+import AdminInventory from '../components/admin/AdminInventory';
+import AdminAnalytics from '../components/admin/AdminAnalytics';
 import { IMAGES } from '../data/catalog';
 import '../components/ui/components.css';
 
 /**
- * Dashboard administrador con gestión de productos, promociones y cupones.
+ * Dashboard administrador con analítica de negocio, control de inventario en gramos,
+ * gestión de pedidos, productos, promociones y cupones.
  */
 const AdminDashboard = () => {
   const { isAuthenticated, logout, session } = useAdmin();
@@ -25,7 +36,7 @@ const AdminDashboard = () => {
     setCoupons,
   } = useCart();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState('analytics');
   const [editingId, setEditingId] = useState(null);
   const { register, handleSubmit, reset, setValue } = useForm();
 
@@ -44,13 +55,24 @@ const AdminDashboard = () => {
 
   // --- Products CRUD ---
   const onProductSubmit = (data) => {
+    const existingProduct = editingId ? products.find((p) => p.id === editingId) : null;
+    const basePrice = Number(data.price) || 14000;
+    const isPizzaCat = data.category === 'pizza' || data.category === 'pizzas-casa';
+
     const product = {
       id: editingId || generateId(),
       name: data.name,
-      category: data.category || 'pizzas-casa',
+      category: data.category || 'pizza',
       description: data.description,
       ingredients: data.ingredients ? data.ingredients.split(',').map((i) => i.trim()) : [],
-      price: Number(data.price),
+      price: basePrice,
+      prices: isPizzaCat
+        ? existingProduct?.prices || {
+            I: Math.round(basePrice * 0.35),
+            M: basePrice,
+            F: Math.round(basePrice * 1.28),
+          }
+        : undefined,
       image: data.image || IMAGES.pizza,
       tag: data.tag || null,
       active: data.active !== 'false',
@@ -72,7 +94,7 @@ const AdminDashboard = () => {
     setValue('category', product.category);
     setValue('description', product.description);
     setValue('ingredients', product.ingredients?.join(', '));
-    setValue('price', product.price);
+    setValue('price', product.price ?? product.prices?.M ?? 0);
     setValue('image', product.image);
     setValue('tag', product.tag || '');
     setValue('active', String(product.active));
@@ -97,12 +119,15 @@ const AdminDashboard = () => {
   const onPromoSubmit = (data) => {
     const promo = {
       id: editingId || generateId(),
+      name: data.title,
       title: data.title,
+      category: 'promocion',
       description: data.description,
       price: Number(data.price),
       size: data.size,
       type: '2x1',
       tier: data.tier,
+      includes: data.options ? data.options.split(',').map((o) => o.trim()) : [],
       options: data.options ? data.options.split(',').map((o) => o.trim()) : [],
       tag: data.tag || null,
       active: data.active !== 'false',
@@ -121,12 +146,12 @@ const AdminDashboard = () => {
 
   const editPromo = (promo) => {
     setEditingId(promo.id);
-    setValue('title', promo.title);
+    setValue('title', promo.title || promo.name);
     setValue('description', promo.description);
     setValue('price', promo.price);
-    setValue('size', promo.size);
-    setValue('tier', promo.tier);
-    setValue('options', promo.options?.join(', '));
+    setValue('size', promo.size || 'Familiar');
+    setValue('tier', promo.tier || 'basica');
+    setValue('options', (promo.options || promo.includes)?.join(', '));
     setValue('tag', promo.tag || '');
     setValue('active', String(promo.active));
   };
@@ -190,22 +215,29 @@ const AdminDashboard = () => {
       <div className="admin-dashboard">
         <div className="admin-header">
           <div>
-            <h1>Panel Administrador</h1>
+            <h1>Panel Administrador — La Masia</h1>
             <p style={{ color: 'var(--color-light-gray)', fontSize: '0.85rem' }}>
               {session?.role} · {session?.username}
             </p>
           </div>
-          <button type="button" className="btn-outline-masia btn-sm" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
+          <div style={{ display: 'flex', gap: '0.6rem' }}>
+            <button type="button" className="btn-outline-masia btn-sm" onClick={() => navigate('/')}>
+              Ver Carta Web
+            </button>
+            <button type="button" className="btn-outline-masia btn-sm" onClick={handleLogout}>
+              Cerrar Sesión
+            </button>
+          </div>
         </div>
 
         <div className="admin-tabs">
           {[
-            { id: 'products', label: 'Productos' },
-            { id: 'promotions', label: 'Promociones' },
-            { id: 'coupons', label: 'Cupones' },
-            { id: 'orders', label: 'Pedidos' },
+            { id: 'analytics', label: 'Dashboard y Gráficos', icon: <FaChartLine /> },
+            { id: 'inventory', label: 'Inventario e Insumos', icon: <FaBoxes /> },
+            { id: 'orders', label: 'Pedidos y Comandas', icon: <FaClipboardList /> },
+            { id: 'products', label: 'Productos', icon: <FaPizzaSlice /> },
+            { id: 'promotions', label: 'Promociones', icon: <FaTags /> },
+            { id: 'coupons', label: 'Cupones', icon: <FaTicketAlt /> },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -213,10 +245,19 @@ const AdminDashboard = () => {
               className={`admin-tab ${activeTab === tab.id ? 'active' : ''}`}
               onClick={() => { setActiveTab(tab.id); resetForm(); }}
             >
+              <span style={{ marginRight: '0.4rem', display: 'inline-flex', alignItems: 'center' }}>
+                {tab.icon}
+              </span>
               {tab.label}
             </button>
           ))}
         </div>
+
+        {/* Analytics / Charts Tab */}
+        {activeTab === 'analytics' && <AdminAnalytics />}
+
+        {/* Inventory Control Tab */}
+        {activeTab === 'inventory' && <AdminInventory />}
 
         {/* Products Tab */}
         {activeTab === 'products' && (
@@ -232,12 +273,14 @@ const AdminDashboard = () => {
                   <div className="form-group">
                     <label>Categoría</label>
                     <select className="form-control-masia" {...register('category')}>
-                      <option value="pizzas-casa">Pizzas de la Casa</option>
-                      <option value="otros">Otros Productos</option>
+                      <option value="pizza">Pizzas de la Casa</option>
+                      <option value="acompanamiento">Acompañamiento</option>
+                      <option value="papas">Papas Fritas</option>
+                      <option value="salsa">Salsas / Otros</option>
                     </select>
                   </div>
                   <div className="form-group">
-                    <label>Precio</label>
+                    <label>Precio (Base o Mediana)</label>
                     <input type="number" className="form-control-masia" {...register('price', { required: true })} />
                   </div>
                   <div className="form-group">
@@ -286,9 +329,10 @@ const AdminDashboard = () => {
               <table className="admin-table">
                 <thead>
                   <tr>
+                    <th>Foto</th>
                     <th>Nombre</th>
                     <th>Categoría</th>
-                    <th>Precio</th>
+                    <th>Precios</th>
                     <th>Estado</th>
                     <th>Acciones</th>
                   </tr>
@@ -296,9 +340,20 @@ const AdminDashboard = () => {
                 <tbody>
                   {products.map((p) => (
                     <tr key={p.id}>
-                      <td>{p.name}</td>
+                      <td>
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }}
+                        />
+                      </td>
+                      <td><strong>{p.name}</strong></td>
                       <td>{p.category}</td>
-                      <td>{formatCurrency(p.price)}</td>
+                      <td>
+                        {p.prices
+                          ? `I: ${formatCurrency(p.prices.I)} · M: ${formatCurrency(p.prices.M)} · F: ${formatCurrency(p.prices.F)}`
+                          : formatCurrency(p.price || 0)}
+                      </td>
                       <td>
                         <span className={`status-badge ${p.active ? 'status-active' : 'status-inactive'}`}>
                           {p.active ? 'Activo' : 'Inactivo'}
@@ -351,7 +406,7 @@ const AdminDashboard = () => {
                     <input className="form-control-masia" {...register('description')} />
                   </div>
                   <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-                    <label>Opciones (separadas por coma)</label>
+                    <label>Opciones / Incluye (separadas por coma)</label>
                     <input className="form-control-masia" {...register('options')} />
                   </div>
                   <div className="form-group">
@@ -387,7 +442,7 @@ const AdminDashboard = () => {
                 <thead>
                   <tr>
                     <th>Título</th>
-                    <th>Tamaño</th>
+                    <th>Descripción</th>
                     <th>Precio</th>
                     <th>Estado</th>
                     <th>Acciones</th>
@@ -396,8 +451,8 @@ const AdminDashboard = () => {
                 <tbody>
                   {promotions.map((p) => (
                     <tr key={p.id}>
-                      <td>{p.title}</td>
-                      <td>{p.size}</td>
+                      <td><strong>{p.title || p.name}</strong></td>
+                      <td>{p.description}</td>
                       <td>{formatCurrency(p.price)}</td>
                       <td>
                         <span className={`status-badge ${p.active ? 'status-active' : 'status-inactive'}`}>

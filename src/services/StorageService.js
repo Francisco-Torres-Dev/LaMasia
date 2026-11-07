@@ -12,6 +12,10 @@ const STORAGE_KEYS = {
   COMANDAS: 'lamasia_comandas',
   DELIVERY_SETTINGS: 'lamasia_delivery_settings',
   CATALOG_VERSION: 'lamasia_catalog_version',
+  INVENTORY: 'lamasia_inventory',
+  INVENTORY_MOVEMENTS: 'lamasia_inventory_movements',
+  CUSTOM_RECIPES: 'lamasia_custom_recipes',
+  ORDERS_SEEDED: 'lamasia_orders_seeded_v1',
 };
 
 /**

@@ -3,6 +3,7 @@ import { generateId } from '../utils/generateId';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import StorageService from '../services/StorageService';
 import OrdersService from '../services/OrdersService';
+import InventoryService from '../services/InventoryService';
 import { calculateCartTotals } from '../utils/pricing';
 import { SIZE_LABELS } from '../data/catalog';
 import {
@@ -31,11 +32,28 @@ export const CartProvider = ({ children }) => {
   });
   const [orders, setOrdersState] = useState(() => OrdersService.getOrders());
   const [comandas, setComandasState] = useState(() => OrdersService.getComandas());
+  const [inventory, setInventoryState] = useState(() => InventoryService.getInventory());
+  const [inventoryMovements, setInventoryMovementsState] = useState(() => InventoryService.getMovements());
+
+  const refreshInventory = useCallback(() => {
+    setInventoryState(InventoryService.getInventory());
+    setInventoryMovementsState(InventoryService.getMovements());
+  }, []);
+
+  const setInventory = useCallback(
+    (newInventory) => {
+      const resolved = typeof newInventory === 'function' ? newInventory(inventory) : newInventory;
+      InventoryService.saveInventory(resolved);
+      setInventoryState(resolved);
+    },
+    [inventory]
+  );
 
   const refreshOrders = useCallback(() => {
     setOrdersState(OrdersService.getOrders());
     setComandasState(OrdersService.getComandas());
-  }, []);
+    refreshInventory();
+  }, [refreshInventory]);
 
   const allProducts = useMemo(() => [...products, ...drinks], [products, drinks]);
 
@@ -213,6 +231,10 @@ export const CartProvider = ({ children }) => {
       allProducts,
       orders,
       comandas,
+      inventory,
+      inventoryMovements,
+      setInventory,
+      refreshInventory,
       createOrder,
       updateOrderStatus,
       acceptOrder,
@@ -245,12 +267,19 @@ export const CartProvider = ({ children }) => {
       allProducts,
       orders,
       comandas,
+      inventory,
+      inventoryMovements,
+      setInventory,
+      refreshInventory,
       createOrder,
       updateOrderStatus,
       acceptOrder,
       getOrdersByDate,
       exportOrdersTxt,
       refreshOrders,
+      deliverySettings,
+      setDeliverySettings,
+      updateOrder,
       setProductsState,
       setDrinksState,
       setPromotionsState,
