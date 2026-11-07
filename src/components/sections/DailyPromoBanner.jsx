@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { FaFire, FaCalendarAlt, FaShoppingCart, FaStar } from 'react-icons/fa';
+import { FaFire, FaCalendarAlt, FaShoppingCart, FaStar, FaLock, FaBan } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency as formatPrice } from '../../utils/formatCurrency';
@@ -9,6 +9,7 @@ const DAILY_PIZZAS = [
   {
     dayIndex: 2,
     dayLabel: 'MARTES',
+    dayName: 'Martes',
     pizzaId: 'pizza-especial-mix',
     name: 'Especial Mix',
     ingredients: 'Salsa pomodoro, Mozzarella, Pepperoni, Champiñón y Aceitunas',
@@ -20,6 +21,7 @@ const DAILY_PIZZAS = [
   {
     dayIndex: 3,
     dayLabel: 'MIÉRCOLES',
+    dayName: 'Miércoles',
     pizzaId: 'pizza-suprema',
     name: 'Suprema',
     ingredients: 'Salsa pomodoro, Mozzarella, Pollo, Pimentón y Aceitunas',
@@ -31,6 +33,7 @@ const DAILY_PIZZAS = [
   {
     dayIndex: 4,
     dayLabel: 'JUEVES',
+    dayName: 'Jueves',
     pizzaId: 'pizza-espanola',
     name: 'Española',
     ingredients: 'Salsa pomodoro, Mozzarella, Choricillo, Aceitunas y Cebolla caramelizada',
@@ -41,14 +44,28 @@ const DAILY_PIZZAS = [
   },
 ];
 
+const DAY_NAMES_ES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
 /**
  * Banner destacado debajo del Hero: Promoción Pizza del Día (Martes, Miércoles y Jueves) Familiar a $8.900.
+ * El botón de pedir se habilita únicamente en el día que corresponde a cada pizza y NO aplica 2x1.
  */
 const DailyPromoBanner = () => {
   const { products, addToCart } = useCart();
   const todayIndex = new Date().getDay(); // 2 = Martes, 3 = Miércoles, 4 = Jueves
+  const todayName = DAY_NAMES_ES[todayIndex];
 
   const handleOrderDailyPromo = (dailyItem) => {
+    if (todayIndex !== dailyItem.dayIndex) {
+      Swal.fire({
+        icon: 'info',
+        title: `Disponible solo los ${dailyItem.dayName}`,
+        text: `Hoy es ${todayName}. La promoción de Pizza ${dailyItem.name} Familiar a ${formatPrice(dailyItem.promoPrice)} solo se puede pedir los días ${dailyItem.dayName}.`,
+        confirmButtonText: 'Entendido',
+      });
+      return;
+    }
+
     const catalogPizza = products.find((p) => p.id === dailyItem.pizzaId);
     const productToAdd = catalogPizza || {
       id: dailyItem.pizzaId,
@@ -61,14 +78,15 @@ const DailyPromoBanner = () => {
       size: 'F',
       price: dailyItem.promoPrice,
       eligible2x1: false,
-      details: `Promo Pizza del Día (${dailyItem.dayLabel})`,
+      isDailyPromo: true,
+      details: `Promo Pizza del Día (${dailyItem.dayName}) · Sin 2x1`,
     });
 
     Swal.fire({
       icon: 'success',
-      title: `¡Promo ${dailyItem.dayLabel} agregada!`,
-      text: `Pizza ${dailyItem.name} Familiar por ${formatPrice(dailyItem.promoPrice)} añadida al carrito.`,
-      timer: 1800,
+      title: `¡Promo ${dailyItem.dayName} agregada!`,
+      text: `Pizza ${dailyItem.name} Familiar por ${formatPrice(dailyItem.promoPrice)} añadida al carrito (no acumulable con 2x1).`,
+      timer: 2000,
       showConfirmButton: false,
     });
   };
@@ -94,6 +112,9 @@ const DailyPromoBanner = () => {
               <span className="daily-promo-days-pill">
                 <FaCalendarAlt /> MARTES · MIÉRCOLES · JUEVES
               </span>
+              <span className="daily-promo-no2x1-pill">
+                <FaBan /> NO APLICA 2x1
+              </span>
             </div>
 
             <div className="daily-promo-title-row">
@@ -103,7 +124,10 @@ const DailyPromoBanner = () => {
                 </h2>
                 <p className="daily-promo-subtitle">
                   Disfruta nuestras clásicas de la casa recién horneadas en tamaño{' '}
-                  <strong>Familiar</strong> todos los martes, miércoles y jueves.
+                  <strong>Familiar</strong> todos los martes, miércoles y jueves.{' '}
+                  <span className="daily-promo-rule-inline">
+                    *Se habilita exclusivamente el día correspondiente y no es acumulable con promoción 2x1.
+                  </span>
                 </p>
               </div>
 
@@ -122,7 +146,7 @@ const DailyPromoBanner = () => {
               return (
                 <motion.div
                   key={item.dayLabel}
-                  className={`daily-pizza-card accent-${item.accent} ${isToday ? 'is-today' : ''}`}
+                  className={`daily-pizza-card accent-${item.accent} ${isToday ? 'is-today' : 'is-locked'}`}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -132,9 +156,13 @@ const DailyPromoBanner = () => {
                     <img src={item.image} alt={`Pizza ${item.name}`} loading="lazy" />
                     <div className="daily-pizza-img-overlay" />
                     <span className="daily-pizza-day-tag">{item.dayLabel}</span>
-                    {isToday && (
+                    {isToday ? (
                       <span className="daily-pizza-today-badge">
-                        <FaStar /> HOY DISPONIBLE
+                        <FaStar /> HOY ACTIVA
+                      </span>
+                    ) : (
+                      <span className="daily-pizza-locked-badge">
+                        <FaLock /> Solo {item.dayName}
                       </span>
                     )}
                     <div className="daily-pizza-floating-price">{formatPrice(item.promoPrice)}</div>
@@ -143,7 +171,7 @@ const DailyPromoBanner = () => {
                   <div className="daily-pizza-body">
                     <div className="daily-pizza-heading">
                       <h3>Pizza {item.name}</h3>
-                      <span className="daily-pizza-size-chip">Familiar</span>
+                      <span className="daily-pizza-size-chip">Familiar · Sin 2x1</span>
                     </div>
                     <p className="daily-pizza-ingredients">{item.ingredients}</p>
 
@@ -154,10 +182,24 @@ const DailyPromoBanner = () => {
                       </div>
                       <button
                         type="button"
-                        className="btn-daily-promo"
+                        className={`btn-daily-promo ${!isToday ? 'disabled' : ''}`}
+                        disabled={!isToday}
                         onClick={() => handleOrderDailyPromo(item)}
+                        title={
+                          isToday
+                            ? `Agregar Pizza ${item.name} Familiar por ${formatPrice(item.promoPrice)}`
+                            : `Esta promoción solo está habilitada los días ${item.dayName}`
+                        }
                       >
-                        <FaShoppingCart /> Pedir {item.dayLabel.charAt(0) + item.dayLabel.slice(1).toLowerCase()}
+                        {isToday ? (
+                          <>
+                            <FaShoppingCart /> Pedir Promo {item.dayName}
+                          </>
+                        ) : (
+                          <>
+                            <FaLock /> Solo los {item.dayName}
+                          </>
+                        )}
                       </button>
                     </div>
                   </div>

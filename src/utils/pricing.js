@@ -1,6 +1,7 @@
 /**
  * Calcula descuento promoción 2x1 para pizzas Mediana y Familiar.
  * Regla: cada par del mismo tamaño paga solo la más cara.
+ * Excluye explícitamente Promociones, Pizza del Día ($8.900) y Pizzas personalizadas.
  */
 const normalizeSize = (size) => {
   if (size === 'Mediana' || size === 'M') return 'M';
@@ -11,8 +12,13 @@ const normalizeSize = (size) => {
 const is2x1Eligible = (item) => {
   if (item.category === 'promocion') return false;
   if (item.eligible2x1 === false) return false;
+  if (item.isDailyPromo) return false;
   if (item.builder) return false;
+  if (typeof item.details === 'string' && item.details.toLowerCase().includes('promo pizza del día')) {
+    return false;
+  }
   const size = normalizeSize(item.size);
+  if (size === 'F' && item.price <= 8900) return false;
   return size === 'M' || size === 'F';
 };
 

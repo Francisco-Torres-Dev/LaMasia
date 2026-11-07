@@ -1466,6 +1466,28 @@
   border-radius: 999px;
 }
 
+.daily-promo-no2x1-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ff9b9f;
+  font-size: 0.73rem;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  padding: 0.38rem 0.85rem;
+  border-radius: 999px;
+}
+
+.daily-promo-rule-inline {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.83rem;
+  color: var(--color-gold);
+  font-weight: 500;
+}
+
 .daily-promo-title-row {
   display: flex;
   flex-direction: column;
@@ -1649,6 +1671,27 @@
   box-shadow: 0 4px 12px rgba(0, 166, 82, 0.45);
 }
 
+.daily-pizza-locked-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(15, 15, 15, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-light-gray);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 0.28rem 0.65rem;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+}
+
+.daily-pizza-card.is-locked {
+  opacity: 0.88;
+}
+
 .daily-pizza-floating-price {
   position: absolute;
   bottom: 10px;
@@ -1743,8 +1786,19 @@
   transition: var(--transition-smooth);
 }
 
-.btn-daily-promo:hover {
+.btn-daily-promo:hover:not(.disabled) {
   background: linear-gradient(135deg, #e0252f, var(--color-italian-red));
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(205, 33, 42, 0.35);
+}
+
+.btn-daily-promo.disabled,
+.btn-daily-promo:disabled {
+  background: var(--color-dark-gray);
+  border: 1px solid var(--color-medium-gray);
+  color: var(--color-light-gray);
+  cursor: not-allowed;
+  opacity: 0.75;
+  box-shadow: none;
+  transform: none;
 }

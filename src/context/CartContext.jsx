@@ -66,7 +66,9 @@ export const CartProvider = ({ children }) => {
       if (price == null) return;
 
       const sizeLabel = size ? SIZE_LABELS[size] || size : null;
+      const isDailyPromo = Boolean(options.isDailyPromo);
       const eligible2x1 =
+        !isDailyPromo &&
         product.category === 'pizza' &&
         (size === 'M' || size === 'F') &&
         options.eligible2x1 !== false;
@@ -96,6 +98,7 @@ export const CartProvider = ({ children }) => {
             details,
             category: product.category || 'general',
             eligible2x1,
+            isDailyPromo,
             image: product.image,
           },
         ];

@@ -95,7 +95,7 @@ const Promotions = () => {
             Al agregar <strong>2 pizzas Medianas</strong> o <strong>2 pizzas Familiares</strong>{' '}
             (iguales o distintas), el carrito aplica automáticamente el 2x1: pagas solo la más cara.
           </p>
-          <p className="promo-2x1-note">No aplica a Individual, a combos promocionales ni a pizzas personalizadas.</p>
+          <p className="promo-2x1-note">No aplica a Individual, a Pizza del Día ($8.900), a combos promocionales ni a pizzas personalizadas.</p>
         </div>
 
         <h3 style={{ marginBottom: '1.5rem', fontSize: '1.3rem' }}>Combos Promocionales</h3>
